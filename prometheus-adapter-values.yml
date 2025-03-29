@@ -1,0 +1,27 @@
+# Deploying the Prometheus Adapter in the prometheus namespace of the cluster using Helm and a custom values file /root/prometheus-adapter-values.yml.
+
+# Desire yaml code.
+
+
+prometheus:
+  url: http://prometheus-operated.prometheus.svc.cluster.local
+  port: 9090
+
+rules:
+  external:
+    - seriesQuery: 'rabbitmq_queue_messages{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        as: "rabbitmq_queue_messages"
+      metricsQuery: 'rabbitmq_queue_messages{service=~".+"}'
+
+
+
+
+
+# helm install prometheus-adapter prometheus-community/prometheus-adapter \
+#      --namespace prometheus  \
+#      --values prometheus-adapter-values.yml

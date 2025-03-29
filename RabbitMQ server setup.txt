@@ -1,0 +1,57 @@
+Seting up RabbitMQ within your Kubernetes cluster using Helm with the following command:
+
+# adding repo using Helm
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+# Installing RabbitMQ using Helm
+helm install rabbitmq bitnami/rabbitmq \
+  --set metrics.enabled=true \
+  --set metrics.serviceMonitor.enabled=true \
+  --set metrics.serviceMonitor.type=detailed \
+  --set metrics.serviceMonitor.additionalLabels.release=prometheus \
+  --set metrics.serviceMonitor.namespace=default \
+  --set metrics.prometheus.export=true \
+  --set metrics.prometheus.port=9419 \
+  --set service.prometheusPort=9419 \
+  --set auth.username=admin \
+  --set auth.password=adminpassword \
+  --set auth.erlangCookie=secretcookie \
+  --set service.headless.enabled=true
+
+# Checking RabbitMQ server is running or not
+kubectl get pods
+
+# Output shloud be like this:
+NAME         READY   STATUS    RESTARTS   AGE
+rabbitmq-0   1/1     Running   0          2m44s
+
+# Checking is the service for RabbitMQ is running or not
+kubectl get svc
+
+# Output:
+NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                                          AGE
+kubernetes          ClusterIP   10.96.0.1        <none>        443/TCP                                          49m
+rabbitmq            ClusterIP   10.104.203.208   <none>        5672/TCP,4369/TCP,25672/TCP,15672/TCP,9419/TCP   3m48s
+rabbitmq-headless   ClusterIP   None             <none>        4369/TCP,5672/TCP,25672/TCP,15672/TCP            3m48s
+
+
+# Now expose the Metrics Port (9419) in the rabbitmq-headless Service.
+
+kubectl edit service rabbitmq-headless
+ - name: metrics         #added
+    port: 9419            #added
+    protocol: TCP         #added
+    targetPort: metrics   #added
+
+
+# Now update the rabbitmq ServiceMonitor Created by Helm to be Scraped by Prometheus.
+labels:
+    app.kubernetes.io/instance: rabbitmq
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/version: 3.13.7
+    helm.sh/chart: rabbitmq-14.7.0
+    release: prometheus-operator    #added
+  name: rabbitmq
+
+

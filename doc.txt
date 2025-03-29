@@ -1,0 +1,6 @@
+How to scale a Kubernetes Deployment based on the number of messages in a RabbitMQ queue. The setup involves:
+
+1. RabbitMQ: A message queue to monitor
+2. Prometheus: To scrape metrics from RabbitMQ
+3. Prometheus Adapter: To expose those metrics as external metrics to Kubernetes
+4. Horizontal Pod Autoscaler (HPA): To scale the deployment based on the metrics exposed by Prometheus
