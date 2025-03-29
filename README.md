@@ -1,2 +1,3 @@
 # HPA-external-metrics
-K8s
+This whole project is about to auto scale a Kubernetes application.
+Tolls: Helm, Kubernetes, Python, Prometheus, RabbitMQ
